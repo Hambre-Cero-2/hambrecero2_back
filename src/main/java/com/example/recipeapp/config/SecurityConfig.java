@@ -2,6 +2,8 @@ package com.example.recipeapp.config;
 
 import com.example.recipeapp.security.AuthTokenFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import com.example.recipeapp.security.AuthEntryPointJwt;
+import com.example.recipeapp.security.CustomAccessDeniedHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -17,9 +19,15 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final AuthTokenFilter authTokenFilter;
+    private final AuthEntryPointJwt authEntryPointJwt;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
-    public SecurityConfig(AuthTokenFilter authTokenFilter) {
+    public SecurityConfig(AuthTokenFilter authTokenFilter,
+                          AuthEntryPointJwt authEntryPointJwt,
+                          CustomAccessDeniedHandler customAccessDeniedHandler) {
         this.authTokenFilter = authTokenFilter;
+        this.authEntryPointJwt = authEntryPointJwt;
+        this.customAccessDeniedHandler = customAccessDeniedHandler;
     }
 
     @Bean
@@ -28,6 +36,10 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(authEntryPointJwt)
+                        .accessDeniedHandler(customAccessDeniedHandler)
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
