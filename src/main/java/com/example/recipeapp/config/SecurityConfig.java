@@ -32,10 +32,22 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/users").permitAll()
+
                         .requestMatchers(HttpMethod.GET, "/recipes/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/ingredients/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/images/**").permitAll()
-                        .anyRequest().permitAll()
+
+                        .requestMatchers(HttpMethod.POST, "/recipes").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/recipes/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/recipes/**").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.POST, "/ingredients").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/ingredients/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/ingredients/**").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.POST, "/images").hasRole("ADMIN")
+
+                        .anyRequest().authenticated()
                 );
 
         http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);

@@ -3,6 +3,7 @@ package com.example.recipeapp.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -61,5 +62,17 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(500)
                 .body(ErrorResponse.generalError(500, "internal-error", "Unexpected error"));
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleUnsupportedMediaType(HttpMediaTypeNotSupportedException ex) {
+        log.warn("415 Unsupported media type - message={}", ex.getMessage());
+
+        return ResponseEntity.status(415)
+                .body(ErrorResponse.generalError(
+                        415,
+                        "unsupported-media-type",
+                        "Content-Type not supported. Use application/json"
+                ));
     }
 }
