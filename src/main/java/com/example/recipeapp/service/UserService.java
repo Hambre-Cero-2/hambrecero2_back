@@ -5,6 +5,10 @@ import com.example.recipeapp.dto.UserInDto;
 import com.example.recipeapp.dto.UserOutDto;
 import com.example.recipeapp.exception.UserNotFoundException;
 import com.example.recipeapp.repository.UserRepository;
+import com.example.recipeapp.dto.JwtResponseDto;
+import com.example.recipeapp.dto.LoginRequestDto;
+import com.example.recipeapp.security.JwtUtils;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,13 +21,16 @@ public class UserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtils jwtUtils;
 
     public UserService(UserRepository userRepository,
                        ModelMapper modelMapper,
-                       PasswordEncoder passwordEncoder) {
+                       PasswordEncoder passwordEncoder,
+                       JwtUtils jwtUtils) {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtils = jwtUtils;
     }
 
     public UserOutDto create(UserInDto userInDto) {
@@ -43,13 +50,13 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
 
-        return toOutDto(savedUser);
+        return userOutDto(savedUser);
     }
 
     public List<UserOutDto> findAll() {
         return userRepository.findAll()
                 .stream()
-                .map(this::toOutDto)
+                .map(this::userOutDto)
                 .toList();
     }
 
@@ -57,10 +64,26 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(UserNotFoundException::new);
 
-        return toOutDto(user);
+        return userOutDto(user);
     }
 
-    private UserOutDto toOutDto(User user) {
+    private UserOutDto userOutDto(User user) {
         return modelMapper.map(user, UserOutDto.class);
+    }
+
+    public JwtResponseDto authenticate(LoginRequestDto loginRequestDto) {
+        User user = userRepository.findByUsername(loginRequestDto.username);
+
+        if (user == null) {
+            throw new UserNotFoundException("Invalid username or password");
+        }
+
+        if (!passwordEncoder.matches(loginRequestDto.password, user.getPassword())) {
+            throw new UserNotFoundException("Invalid username or password");
+        }
+
+        String token = jwtUtils.generateJwtToken(user);
+
+        return new JwtResponseDto(token, user.getId(), user.getUsername(), user.getEmail(), user.getRole());
     }
 }
