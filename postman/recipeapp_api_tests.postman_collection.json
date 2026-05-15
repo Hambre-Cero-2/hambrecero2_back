@@ -1,0 +1,1421 @@
+{
+  "info": {
+    "_postman_id": "a5774056-13cd-4b22-afa1-6fcefef6c21f",
+    "name": "RecipeApp API Test",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "48848621"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "01 - Login admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Login devuelve estructura esperada\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(json).to.have.property(\"token\");\r",
+                  "    pm.expect(json).to.have.property(\"type\");\r",
+                  "    pm.expect(json).to.have.property(\"id\");\r",
+                  "    pm.expect(json).to.have.property(\"username\");\r",
+                  "    pm.expect(json).to.have.property(\"email\");\r",
+                  "    pm.expect(json).to.have.property(\"role\");\r",
+                  "\r",
+                  "    pm.expect(json.type).to.eql(\"Bearer\");\r",
+                  "    pm.expect(json.role).to.eql(\"ADMIN\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Guardar token admin\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.collectionVariables.set(\"adminToken\", json.token);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"username\": \"adminNewman\",\r\n    \"password\": \"1234\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Ingredients",
+      "item": [
+        {
+          "name": "01- Create ingredient 201",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Estructura ok\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "\r",
+                  "    pm.collectionVariables.set(\"ingredientId\", json.id);\r",
+                  "\r",
+                  "    pm.expect(json).to.have.property(\"id\");\r",
+                  "    pm.expect(json).to.have.property(\"name\");\r",
+                  "    pm.expect(json).to.have.property(\"calories\");\r",
+                  "    pm.expect(json).to.have.property(\"season\");\r",
+                  "    pm.expect(json).to.have.property(\"organic\");\r",
+                  "    pm.expect(json).to.have.property(\"harvestDate\");\r",
+                  "    pm.expect(json).to.have.property(\"priceKg\");\r",
+                  "    pm.expect(json).to.have.property(\"carbonFootprint\");\r",
+                  "\r",
+                  "    pm.expect(json.name).to.eql(\"Tomato\");\r",
+                  "    pm.expect(json.calories).to.eql(22);\r",
+                  "    pm.expect(json.season).to.eql(\"SUMMER\");\r",
+                  "\r",
+                  "\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \r\n    \"name\": \"Tomato\",\r\n    \"calories\": 22,\r\n    \"season\": \"SUMMER\",\r\n    \"isOrganic\": true,\r\n    \"harvestDate\": \"2026-05-14\",\r\n    \"priceKg\": 2.50,\r\n    \"carbonFootprint\": 0.40\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ingredients",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ingredients"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "02 - Create ingredient 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 400 Bad Request\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Error 400 con estructura esperada\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(json).to.have.property(\"code\");\r",
+                  "    pm.expect(json).to.have.property(\"title\");\r",
+                  "    pm.expect(json).to.have.property(\"message\");\r",
+                  "    pm.expect(json).to.have.property(\"errors\");\r",
+                  "\r",
+                  "    pm.expect(json.code).to.eql(400);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"\",\r\n  \"calories\": -5,\r\n  \"season\": \"SUMMER\",\r\n  \"isOrganic\": true,\r\n  \"harvestDate\": \"2026-05-14\",\r\n  \"priceKg\": -2.50,\r\n  \"carbonFootprint\": 0.40\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ingredients",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ingredients"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "03 - Get ingredients 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Lista\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json).to.be.an(\"array\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Aparece el ingrediente\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "    const ingredientId = Number(pm.collectionVariables.get(\"ingredientId\"));\r",
+                  "\r",
+                  "    const ingredient = json.find(item => item.id === ingredientId);\r",
+                  "\r",
+                  "    pm.expect(ingredient).to.not.be.undefined;\r",
+                  "    pm.expect(ingredient).to.have.property(\"id\");\r",
+                  "    pm.expect(ingredient).to.have.property(\"name\");\r",
+                  "    pm.expect(ingredient).to.have.property(\"calories\");\r",
+                  "    pm.expect(ingredient).to.have.property(\"season\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ingredients",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ingredients"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "04 - Get ingredient by Id 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Aparece ingrediente creado ok\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(json.id).to.eql(Number(pm.collectionVariables.get(\"ingredientId\")));\r",
+                  "    pm.expect(json).to.have.property(\"name\");\r",
+                  "    pm.expect(json).to.have.property(\"calories\");\r",
+                  "    pm.expect(json).to.have.property(\"season\");\r",
+                  "    pm.expect(json).to.have.property(\"organic\");\r",
+                  "    pm.expect(json).to.have.property(\"harvestDate\");\r",
+                  "    pm.expect(json).to.have.property(\"priceKg\");\r",
+                  "    pm.expect(json).to.have.property(\"carbonFootprint\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ingredients/{{ingredientId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ingredients",
+                "{{ingredientId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "05 - Get ingredient by Id 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 404 Not Found\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Error 404. El ingrediente no existe\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(json).to.have.property(\"code\");\r",
+                  "    pm.expect(json).to.have.property(\"title\");\r",
+                  "    pm.expect(json).to.have.property(\"message\");\r",
+                  "    pm.expect(json).to.have.property(\"errors\");\r",
+                  "\r",
+                  "    pm.expect(json.code).to.eql(404);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ingredients/99999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ingredients",
+                "99999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "06 - Update ingredient 201",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Ingrediente modificado \", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(json.id).to.eql(Number(pm.collectionVariables.get(\"ingredientId\")));\r",
+                  "    pm.expect(json.name).to.eql(\"Tomato updated\");\r",
+                  "    pm.expect(json.calories).to.eql(25);\r",
+                  "    pm.expect(json.season).to.eql(\"SUMMER\");\r",
+                  "    pm.expect(json.organic).to.eql(false);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Tomato updated\",\r\n    \"calories\":25,\r\n    \"season\": \"SUMMER\",\r\n    \"isOrganic\": false,\r\n    \"harvestDate\": \"2026-05-14\",\r\n    \"priceKg\": 3.00,\r\n    \"carbonFootprint\": 0.50\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ingredients/{{ingredientId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ingredients",
+                "{{ingredientId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "07 - Update ingredient 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 400 Bad Request\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Error 400\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(json).to.have.property(\"code\");\r",
+                  "    pm.expect(json).to.have.property(\"title\");\r",
+                  "    pm.expect(json).to.have.property(\"message\");\r",
+                  "    pm.expect(json).to.have.property(\"errors\");\r",
+                  "\r",
+                  "    pm.expect(json.code).to.eql(400);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"\",\r\n    \"calories\": -10,\r\n    \"season\": \"SUMMER\",\r\n    \"isOrganic\": true,\r\n    \"harvestDate\": \"2026-05-14\",\r\n    \"priceKg\": -1.00,\r\n    \"carbonFootprint\": 0.40\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ingredients/{{ingredientId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ingredients",
+                "{{ingredientId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "08 - Update ingredient 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 404 Not Found\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Error 404\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(json).to.have.property(\"code\");\r",
+                  "    pm.expect(json).to.have.property(\"title\");\r",
+                  "    pm.expect(json).to.have.property(\"message\");\r",
+                  "    pm.expect(json).to.have.property(\"errors\");\r",
+                  "\r",
+                  "    pm.expect(json.code).to.eql(404);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Not found ingredient\",\r\n    \"calories\": 25,\r\n    \"season\": \"SUMMER\",\r\n    \"isOrganic\": false,\r\n    \"harvestDate\": \"2026-05-14\",\r\n    \"priceKg\": 3.00,\r\n    \"carbonFootprint\": 0.50\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ingredients/99999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ingredients",
+                "99999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "09 - Create ingredient to delete 201",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Creado ingrediente para borrar\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "\r",
+                  "    pm.collectionVariables.set(\"ingredientDeleteId\", json.id);\r",
+                  "\r",
+                  "    pm.expect(json).to.have.property(\"id\");\r",
+                  "    pm.expect(json).to.have.property(\"name\");\r",
+                  "    pm.expect(json).to.have.property(\"calories\");\r",
+                  "    pm.expect(json).to.have.property(\"season\");\r",
+                  "    pm.expect(json).to.have.property(\"organic\");\r",
+                  "    pm.expect(json).to.have.property(\"harvestDate\");\r",
+                  "    pm.expect(json).to.have.property(\"priceKg\");\r",
+                  "    pm.expect(json).to.have.property(\"carbonFootprint\");\r",
+                  "\r",
+                  "\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Newman Ingredient To Delete\",\r\n  \"calories\": 10,\r\n  \"season\": \"SUMMER\",\r\n  \"isOrganic\": true,\r\n  \"harvestDate\": \"2026-05-14\",\r\n  \"priceKg\": 1.50,\r\n  \"carbonFootprint\": 0.20\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ingredients",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ingredients"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "10 - Delete ingredient 204",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 204 No Content\", function () {\r",
+                  "    pm.response.to.have.status(204);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Eliminado ok\", function () {\r",
+                  "    pm.expect(pm.response.text()).to.eql(\"\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ingredients/{{ingredientDeleteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ingredients",
+                "{{ingredientDeleteId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "11 - Get deleted ingredient 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 404 Not Found\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Error 404. No encuentra el ingrediente\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(json).to.have.property(\"code\");\r",
+                  "    pm.expect(json).to.have.property(\"title\");\r",
+                  "    pm.expect(json).to.have.property(\"message\");\r",
+                  "    pm.expect(json).to.have.property(\"errors\");\r",
+                  "\r",
+                  "    pm.expect(json.code).to.eql(404);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ingredients/{{ingredientDeleteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ingredients",
+                "{{ingredientDeleteId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Recipes",
+      "item": [
+        {
+          "name": "01 - Create recipe 201",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Receta creada\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(json).to.have.property(\"id\");\r",
+                  "    pm.expect(json).to.have.property(\"name\");\r",
+                  "    pm.expect(json).to.have.property(\"difficulty\");\r",
+                  "    pm.expect(json).to.have.property(\"vegetarian\");\r",
+                  "    pm.expect(json).to.have.property(\"estimatedCost\");\r",
+                  "    pm.expect(json).to.have.property(\"lastModified\");\r",
+                  "    pm.expect(json).to.have.property(\"servings\");\r",
+                  "    pm.expect(json).to.have.property(\"ingredientIds\");\r",
+                  "\r",
+                  "    pm.expect(json.name).to.eql(\"Newman Recipe\");\r",
+                  "    pm.expect(json.difficulty).to.eql(2);\r",
+                  "    pm.expect(json.vegetarian).to.eql(true);\r",
+                  "    pm.expect(json.ingredientIds).to.be.an(\"array\");\r",
+                  "\r",
+                  "    pm.collectionVariables.set(\"recipeId\", json.id);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Newman Recipe\",\r\n  \"difficulty\": 2,\r\n  \"vegetarian\": true,\r\n  \"estimatedCost\": 4.50,\r\n  \"lastModified\": \"2026-05-14\",\r\n  \"servings\": 2,\r\n  \"ingredientIds\": [{{ingredientId}}]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recipes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recipes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "02 - Create recipe 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 400 Bad Request\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Error 400 por no cumplir estructura\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(json).to.have.property(\"code\");\r",
+                  "    pm.expect(json).to.have.property(\"title\");\r",
+                  "    pm.expect(json).to.have.property(\"message\");\r",
+                  "    pm.expect(json).to.have.property(\"errors\");\r",
+                  "\r",
+                  "    pm.expect(json.code).to.eql(400);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"\",\r\n  \"difficulty\": 0,\r\n  \"vegetarian\": true,\r\n  \"estimatedCost\": -4.50,\r\n  \"lastModified\": \"2026-05-14\",\r\n  \"servings\": 0,\r\n  \"ingredientIds\": [{{ingredientId}}]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recipes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recipes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "03 - Get recipes 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Lista de ingredientse\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json).to.be.an(\"array\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Receta con ID específico\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "    const recipeId = Number(pm.collectionVariables.get(\"recipeId\"));\r",
+                  "\r",
+                  "    const recipe = json.find(item => item.id === recipeId);\r",
+                  "\r",
+                  "    pm.expect(recipe).to.not.be.undefined;\r",
+                  "    pm.expect(recipe).to.have.property(\"id\");\r",
+                  "    pm.expect(recipe).to.have.property(\"name\");\r",
+                  "    pm.expect(recipe).to.have.property(\"difficulty\");\r",
+                  "    pm.expect(recipe).to.have.property(\"vegetarian\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/recipes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recipes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "04 - Get recipe by id 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Aparece la receta sin login\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(json.id).to.eql(Number(pm.collectionVariables.get(\"recipeId\")));\r",
+                  "    pm.expect(json).to.have.property(\"name\");\r",
+                  "    pm.expect(json).to.have.property(\"difficulty\");\r",
+                  "    pm.expect(json).to.have.property(\"vegetarian\");\r",
+                  "    pm.expect(json).to.have.property(\"estimatedCost\");\r",
+                  "    pm.expect(json).to.have.property(\"lastModified\");\r",
+                  "    pm.expect(json).to.have.property(\"servings\");\r",
+                  "    pm.expect(json).to.have.property(\"ingredientIds\");\r",
+                  "\r",
+                  "    pm.expect(json.ingredientIds).to.be.an(\"array\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/recipes/{{recipeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recipes",
+                "{{recipeId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "05 - Get recipe by Id 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 404 Not Found\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Error 404. La receta no existe\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(json).to.have.property(\"code\");\r",
+                  "    pm.expect(json).to.have.property(\"title\");\r",
+                  "    pm.expect(json).to.have.property(\"message\");\r",
+                  "    pm.expect(json).to.have.property(\"errors\");\r",
+                  "\r",
+                  "    pm.expect(json.code).to.eql(404);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/recipes/9999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recipes",
+                "9999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "06 - Update recipe 202",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 202 Accepted\", function () {\r",
+                  "    pm.response.to.have.status(202);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Receta modificada\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(json.id).to.eql(Number(pm.collectionVariables.get(\"recipeId\")));\r",
+                  "    pm.expect(json.name).to.eql(\"Newman recipe updated\");\r",
+                  "    pm.expect(json.difficulty).to.eql(3);\r",
+                  "    pm.expect(json.servings).to.eql(3);\r",
+                  "    pm.expect(json.ingredientIds).to.be.an(\"array\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Newman recipe updated\",\r\n  \"difficulty\": 3,\r\n  \"vegetarian\": true,\r\n  \"estimatedCost\": 5.25,\r\n  \"lastModified\": \"2026-05-14\",\r\n  \"servings\": 3,\r\n  \"ingredientIds\": [{{ingredientId}}]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recipes/{{recipeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recipes",
+                "{{recipeId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "07 - Update recipe 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 400 Bad Request\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Error 400. Estructura erronea\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(json).to.have.property(\"code\");\r",
+                  "    pm.expect(json).to.have.property(\"title\");\r",
+                  "    pm.expect(json).to.have.property(\"message\");\r",
+                  "    pm.expect(json).to.have.property(\"errors\");\r",
+                  "\r",
+                  "    pm.expect(json.code).to.eql(400);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"\",\r\n  \"difficulty\": 0,\r\n  \"vegetarian\": true,\r\n  \"estimatedCost\": -1.00,\r\n  \"lastModified\": \"2026-05-14\",\r\n  \"servings\": 0,\r\n  \"ingredientIds\": [{{ingredientId}}]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recipes/{{recipeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recipes",
+                "{{recipeId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "08 - Update recipe 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 404 Not Found\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Error 404. La receta no existe\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(json).to.have.property(\"code\");\r",
+                  "    pm.expect(json).to.have.property(\"title\");\r",
+                  "    pm.expect(json).to.have.property(\"message\");\r",
+                  "    pm.expect(json).to.have.property(\"errors\");\r",
+                  "\r",
+                  "    pm.expect(json.code).to.eql(404);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Recipe not found\",\r\n  \"difficulty\": 3,\r\n  \"vegetarian\": true,\r\n  \"estimatedCost\": 5.25,\r\n  \"lastModified\": \"2026-05-14\",\r\n  \"servings\": 3,\r\n  \"ingredientIds\": [{{ingredientId}}]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recipes/9999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recipes",
+                "9999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "09 - Create recipe to delete 201",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Receta para borrar\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "\r",
+                  "    pm.collectionVariables.set(\"recipeDeleteId\", json.id);\r",
+                  "\r",
+                  "    pm.expect(json).to.have.property(\"id\");\r",
+                  "    pm.expect(json).to.have.property(\"name\");\r",
+                  "    pm.expect(json).to.have.property(\"difficulty\");\r",
+                  "    pm.expect(json).to.have.property(\"vegetarian\");\r",
+                  "    pm.expect(json).to.have.property(\"estimatedCost\");\r",
+                  "    pm.expect(json).to.have.property(\"lastModified\");\r",
+                  "    pm.expect(json).to.have.property(\"servings\");\r",
+                  "    pm.expect(json).to.have.property(\"ingredientIds\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Recipe To Delete\",\r\n  \"difficulty\": 1,\r\n  \"vegetarian\": true,\r\n  \"estimatedCost\": 3.50,\r\n  \"lastModified\": \"2026-05-14\",\r\n  \"servings\": 1,\r\n  \"ingredientIds\": [{{ingredientId}}]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recipes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recipes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "10 - Delete recipe 204",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 204 No Content\", function () {\r",
+                  "    pm.response.to.have.status(204);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Respuesta sin body\", function () {\r",
+                  "    pm.expect(pm.response.text()).to.eql(\"\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recipes/{{recipeDeleteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recipes",
+                "{{recipeDeleteId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "11 - Get delete recipe 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 404 Not Found\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Error 404. la receta no existe\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(json).to.have.property(\"code\");\r",
+                  "    pm.expect(json).to.have.property(\"title\");\r",
+                  "    pm.expect(json).to.have.property(\"message\");\r",
+                  "    pm.expect(json).to.have.property(\"errors\");\r",
+                  "\r",
+                  "    pm.expect(json.code).to.eql(404);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/recipes/{{recipeDeleteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recipes",
+                "{{recipeDeleteId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": ""
+    },
+    {
+      "key": "userToken",
+      "value": ""
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "recipeId",
+      "value": ""
+    },
+    {
+      "key": "ingredientId",
+      "value": ""
+    },
+    {
+      "key": "recipeDeleteId",
+      "value": ""
+    },
+    {
+      "key": "ingredientDeleteId",
+      "value": ""
+    }
+  ]
+}
