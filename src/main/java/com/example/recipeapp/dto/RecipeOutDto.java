@@ -16,6 +16,6 @@ public class RecipeOutDto {
     private int servings;
 
     public List<Long> ingredientIds;
-    private String imageName;
+    private String imageUrl;
 
 }
