@@ -9,15 +9,98 @@ on:
 jobs:
   newman:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-java@v5
+      - name: Checkout backend repository
+        uses: actions/checkout@v4
+
+      - name: Checkout config server repository
+        uses: actions/checkout@v4
+        with:
+          repository: Hambre-Cero-2/config-server
+          path: config-server
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
-      - run: mvn package
-      - run: docker build -t hambrecero2_back:test .
-      - run: docker compose up -d
-#     - run: pnpm intall -g newman
-#     - newman run recipeapp_api_tests.postman_collection.json
-#     - newman run recipeapp_local.postman_environment.json
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Give execution permission to Maven wrappers
+        run: |
+          chmod +x ./mvnw
+          chmod +x ./config-server/mvnw
+
+      - name: Install Newman dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Package backend
+        run: ./mvnw clean package -DskipTests
+
+      - name: Start MariaDB
+        run: docker compose up -d
+
+      - name: Start Config Server
+        run: |
+          cd config-server
+          ENCRYPT_KEY=recipeapp-secret-key ./mvnw spring-boot:run > ../config-server.log 2>&1 &
+
+      - name: Wait for Config Server
+        run: |
+          for i in {1..30}; do
+            if curl -s http://localhost:8888/recipeapp/prod > /dev/null; then
+              echo "Config Server is ready"
+              exit 0
+            fi
+            echo "Waiting for Config Server..."
+            sleep 5
+          done
+          echo "Config Server did not start in time"
+          cat config-server.log
+          exit 1
+
+      - name: Start backend API
+        run: |
+          ./mvnw spring-boot:run "-Dspring-boot.run.profiles=prod" > backend.log 2>&1 &
+
+      - name: Wait for backend API
+        run: |
+          for i in {1..40}; do
+            if curl -s http://localhost:8080/ingredients > /dev/null; then
+              echo "Backend API is ready"
+              exit 0
+            fi
+            echo "Waiting for backend API..."
+            sleep 5
+          done
+          echo "Backend API did not start in time"
+          cat backend.log
+          docker compose logs
+          exit 1
+
+      - name: Create admin user for Newman
+        run: |
+          curl -s -X POST http://localhost:8080/users \
+            -H "Content-Type: application/json" \
+            -d '{"username":"adminNewman","password":"1234","email":"adminnewman@email.com"}' || true
+
+          docker exec recipe_db_container mariadb -uroot -proot recipeapp \
+            -e "UPDATE users SET role='ADMIN' WHERE username='adminNewman';"
+
+      - name: Run Newman collection
+        run: pnpm exec newman run postman/recipeapp_api_tests.postman_collection.json -e postman/recipeapp_local.postman_environment.json
+
+      - name: Stop Docker Compose
+        if: always()
+        run: docker compose down
