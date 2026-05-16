@@ -21,6 +21,9 @@ jobs:
           distribution: temurin
           java-version: 21
 
+      - name: Give execution permission to Maven wrapper
+        run: chmod +x ./mvnw
+
       - name: Build Spring Boot jar
         run: ./mvnw clean package -DskipTests
 
