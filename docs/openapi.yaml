@@ -1,0 +1,866 @@
+openapi: 3.0.3
+info:
+  title: RecipeApp API
+  description: API REST for managing recipes, ingredients, users, authentication and image uploads.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local environment
+  - url: http://localhost:8080
+    description: Production environment placeholder
+tags:
+  - name: Auth
+    description: Authentication operations
+  - name: Users
+    description: User registration operations
+  - name: Ingredients
+    description: Ingredient management operations
+  - name: Recipes
+    description: Recipe management operations
+  - name: Images
+    description: Image upload and retrieval operations
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login user
+      description: Authenticates a user and returns a JWT bearer token.
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequestDto'
+      responses:
+        '200':
+          description: Login successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JwtResponseDto'
+        '400':
+          description: Invalid login request body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: User not found or invalid credentials.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /users:
+    post:
+      tags:
+        - Users
+      summary: Register user
+      description: Creates a new user account. The default role is assigned by the backend.
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInDto'
+      responses:
+        '201':
+          description: User created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOutDto'
+        '400':
+          description: Validation error or duplicated user data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /ingredients:
+    get:
+      tags:
+        - Ingredients
+      summary: Get all ingredients
+      description: Returns the full ingredient list.
+      operationId: getAllIngredients
+      responses:
+        '200':
+          description: Ingredient list returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IngredientOutDto'
+        '500':
+          description: Unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+        - Ingredients
+      summary: Create ingredient
+      description: Creates a new ingredient. Requires ADMIN role.
+      operationId: createIngredient
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngredientInDto'
+      responses:
+        '201':
+          description: Ingredient created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngredientOutDto'
+        '400':
+          description: Validation error or invalid ingredient data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Missing or invalid JWT token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Authenticated user does not have ADMIN role.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '415':
+          description: Unsupported media type. Use application/json.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /ingredients/{id}:
+    get:
+      tags:
+        - Ingredients
+      summary: Get ingredient by id
+      description: Returns one ingredient by its identifier.
+      operationId: getIngredientById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Ingredient identifier.
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Ingredient found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngredientOutDto'
+        '404':
+          description: Ingredient not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+        - Ingredients
+      summary: Update ingredient
+      description: Updates an existing ingredient by id. Requires ADMIN role.
+      operationId: updateIngredient
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Ingredient identifier.
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngredientInDto'
+      responses:
+        '201':
+          description: Ingredient updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngredientOutDto'
+        '400':
+          description: Validation error or invalid ingredient data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Missing or invalid JWT token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Authenticated user does not have ADMIN role.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Ingredient not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '415':
+          description: Unsupported media type. Use application/json.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - Ingredients
+      summary: Delete ingredient
+      description: Deletes an ingredient by id. Requires ADMIN role.
+      operationId: deleteIngredient
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Ingredient identifier.
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Ingredient deleted. No content returned.
+        '401':
+          description: Missing or invalid JWT token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Authenticated user does not have ADMIN role.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Ingredient not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /recipes:
+    get:
+      tags:
+        - Recipes
+      summary: Get all recipes
+      description: Returns the full recipe list.
+      operationId: getAllRecipes
+      responses:
+        '200':
+          description: Recipe list returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecipeOutDto'
+        '500':
+          description: Unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+        - Recipes
+      summary: Create recipe
+      description: Creates a new recipe linked to existing ingredients. Requires ADMIN role.
+      operationId: createRecipe
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecipeInDto'
+      responses:
+        '201':
+          description: Recipe created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecipeOutDto'
+        '400':
+          description: Validation error, malformed JSON or invalid ingredient data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Missing or invalid JWT token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Authenticated user does not have ADMIN role.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '415':
+          description: Unsupported media type. Use application/json.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /recipes/{id}:
+    get:
+      tags:
+        - Recipes
+      summary: Get recipe by id
+      description: Returns one recipe by its identifier.
+      operationId: getRecipeById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Recipe identifier.
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Recipe found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecipeOutDto'
+        '404':
+          description: Recipe not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+        - Recipes
+      summary: Update recipe
+      description: Updates an existing recipe by id. Requires ADMIN role.
+      operationId: updateRecipe
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Recipe identifier.
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecipeInDto'
+      responses:
+        '202':
+          description: Recipe updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecipeOutDto'
+        '400':
+          description: Validation error, malformed JSON or invalid recipe data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Missing or invalid JWT token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Authenticated user does not have ADMIN role.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Recipe not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '415':
+          description: Unsupported media type. Use application/json.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - Recipes
+      summary: Delete recipe
+      description: Deletes a recipe by id. Requires ADMIN role.
+      operationId: deleteRecipe
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Recipe identifier.
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Recipe deleted. No content returned.
+        '401':
+          description: Missing or invalid JWT token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Authenticated user does not have ADMIN role.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Recipe not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /images/{filename}:
+    get:
+      tags:
+        - Images
+      summary: Get image by filename
+      description: Returns an uploaded image file.
+      operationId: getImage
+      parameters:
+        - name: filename
+          in: path
+          required: true
+          description: Stored image filename.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Image returned successfully.
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Invalid filename.
+        '404':
+          description: Image not found.
+        '500':
+          description: Unexpected server error.
+  /images:
+    post:
+      tags:
+        - Images
+      summary: Upload image
+      description: Uploads an image file and returns the stored filename and public image URL. Requires ADMIN role.
+      operationId: uploadImage
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Image uploaded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageUploadResponse'
+        '400':
+          description: Empty file or invalid upload request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Missing or invalid JWT token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Authenticated user does not have ADMIN role.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Image upload failed or unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    LoginRequestDto:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: adminNewman
+        password:
+          type: string
+          format: password
+          example: '1234'
+    JwtResponseDto:
+      type: object
+      properties:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiJ9...
+        type:
+          type: string
+          example: Bearer
+        id:
+          type: integer
+          format: int64
+          example: 1
+        username:
+          type: string
+          example: adminNewman
+        email:
+          type: string
+          format: email
+          example: adminnewman@email.com
+        role:
+          type: string
+          example: ADMIN
+    UserInDto:
+      type: object
+      required:
+        - username
+        - password
+        - email
+      properties:
+        username:
+          type: string
+          example: user1
+        password:
+          type: string
+          format: password
+          minLength: 4
+          example: '1234'
+        email:
+          type: string
+          format: email
+          example: user1@email.com
+    UserOutDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        username:
+          type: string
+          example: user1
+        email:
+          type: string
+          format: email
+          example: user1@email.com
+        role:
+          type: string
+          example: USER
+    IngredientInDto:
+      type: object
+      required:
+        - name
+        - season
+        - harvestDate
+        - priceKg
+        - carbonFootprint
+      properties:
+        name:
+          type: string
+          example: Tomato
+        calories:
+          type: integer
+          minimum: 0
+          example: 22
+        season:
+          type: string
+          description: Season name.
+          enum:
+            - SPRING
+            - SUMMER
+            - AUTUMN
+            - WINTER
+          example: SUMMER
+        isOrganic:
+          type: boolean
+          example: true
+        harvestDate:
+          type: string
+          format: date
+          example: '2026-05-14'
+        priceKg:
+          type: number
+          format: double
+          minimum: 0
+          example: 2.5
+        carbonFootprint:
+          type: number
+          format: double
+          minimum: 0
+          example: 0.4
+    IngredientOutDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: Tomato
+        calories:
+          type: integer
+          example: 22
+        season:
+          type: string
+          example: SUMMER
+        organic:
+          type: boolean
+          description: Serialized boolean value for the Java field isOrganic.
+          example: true
+        harvestDate:
+          type: string
+          format: date
+          example: '2026-05-14'
+        priceKg:
+          type: number
+          format: double
+          example: 2.5
+        carbonFootprint:
+          type: number
+          format: double
+          example: 0.4
+    RecipeInDto:
+      type: object
+      required:
+        - name
+        - estimatedCost
+        - lastModified
+        - ingredientIds
+      properties:
+        name:
+          type: string
+          example: Tomato soup
+        difficulty:
+          type: integer
+          minimum: 1
+          example: 2
+        vegetarian:
+          type: boolean
+          example: true
+        estimatedCost:
+          type: number
+          format: double
+          minimum: 0
+          example: 4.5
+        lastModified:
+          type: string
+          format: date
+          example: '2026-05-14'
+        servings:
+          type: integer
+          minimum: 1
+          example: 2
+        ingredientIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+          example:
+            - 1
+        imageName:
+          type: string
+          nullable: true
+          example: soup.jpg
+    RecipeOutDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: Tomato soup
+        difficulty:
+          type: integer
+          example: 2
+        vegetarian:
+          type: boolean
+          example: true
+        estimatedCost:
+          type: number
+          format: double
+          example: 4.5
+        lastModified:
+          type: string
+          format: date
+          example: '2026-05-14'
+        servings:
+          type: integer
+          example: 2
+        ingredientIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+          example:
+            - 1
+        imageUrl:
+          type: string
+          nullable: true
+          example: /images/image.jpg
+    ImageUploadResponse:
+      type: object
+      properties:
+        fileName:
+          type: string
+          example: 550e8400-e29b-41d4-a716-446655440000_image.jpg
+        url:
+          type: string
+          example: /images/550e8400-e29b-41d4-a716-446655440000_image.jpg
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        title:
+          type: string
+          example: bad-request
+        message:
+          type: string
+          example: Validation error
+        errors:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            name: Recipe name cannot be blank
