@@ -1,0 +1,23 @@
+name: Integration tests with Newman
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  newman:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - run: mvn package
+      - run: docker build -t hambrecero2_back:test .
+      - run: docker compose up -d
+#     - run: pnpm intall -g newman
+#     - newman run recipeapp_api_tests.postman_collection.json
+#     - newman run recipeapp_local.postman_environment.json
