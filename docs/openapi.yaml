@@ -1,0 +1,33 @@
+openapi: 3.0.3
+
+info:
+  title: RecipeApp API
+  description: API REST for managing recipes, ingredients, users, authentication and image uploads.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Local environment
+  - url: http://localhost:8080
+    description: Production environment placeholder
+
+tags:
+  - name: Auth
+    description: Authentication operations
+  - name: Users
+    description: User registration operations
+  - name: Ingredients
+    description: Ingredient management operations
+  - name: Recipes
+    description: Recipe management operations
+  - name: Images
+    description: Image upload and retrieval operations
+
+paths: {}
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
